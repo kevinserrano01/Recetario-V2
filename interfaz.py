@@ -105,7 +105,7 @@ class Principal(ttk.Frame):
     def agregar(self):
         """Abrir ventana para crear nueva receta."""
         ventana_tarea = tk.Toplevel(self.ventana)
-        Tarea(ventana_tarea, self.cargar_tabla).grid(row=0, column=0, sticky=tk.NSEW)
+        Receta(ventana_tarea, self.cargar_tabla).grid(row=0, column=0, sticky=tk.NSEW)
 
     def modificar(self):
         """Abrir ventana para modificar una tarea."""
@@ -139,21 +139,21 @@ class Principal(ttk.Frame):
         pass
 
     def eliminar(self):
-    #     seleccion = self.tabla.selection()
-    #     if seleccion:
-    #         item = self.tabla.item(seleccion[0])
-    #         id_tarea = item['values'][0] # id de la tarea obtenida del treeview
-    #         tarea = item['values'][1]
-    #         mensaje = f"Esta a punto de eliminar la tarea: {tarea}.\n¿Desea continuar?"
-    #         if askyesno(title="Eliminar tarea", message=mensaje):
-    #             DB.eliminar_tarea(id_tarea)
-    #             messagebox.showinfo(message="Tarea eliminada.")
-    #             self.cargar_tabla()
-    #     else:
-    #         messagebox.showinfo(message="Debe seleccionar una tarea primero")
-        pass
+        seleccion = self.tabla.selection()
+        if seleccion:
+            item = self.tabla.item(seleccion[0])
+            id_receta = item['values'][0] # id de la receta obtenida del treeview
+            receta = item['values'][1]
+            mensaje = f"Esta a punto de eliminar la tarea: {receta}.\n¿Desea continuar?"
+            if askyesno(title="Eliminar tarea", message=mensaje):
+                DB.eliminar_receta(id_receta)
+                messagebox.showinfo(message="Receta eliminada.")
+                self.cargar_tabla()
+        else:
+            messagebox.showinfo(message="Debe seleccionar una receta primero")
 
-class Tarea(ttk.Frame):
+
+class Receta(ttk.Frame):
     """
     Frame para la ventana que muestra una tarea para modificacion
     o el formulario para crear una nueva.
