@@ -21,6 +21,20 @@ def getNombresIDRecetas():
     conn.close()
     return resultado
 
+def getRecetasFav(fav):
+    """ Obtener solo las recetas favoritas esten en la bdd """
+    conn = conectar()
+    cur = conn.cursor()
+    consulta = """
+                SELECT id, nombre, tiempo_preparacion
+                FROM receta
+                WHERE favorita = %s;
+                """
+    cur.execute(consulta, (fav,))
+    resultado = cur.fetchall()
+    conn.close()
+    return resultado
+
 def get_recetas(tipo="all"):
     """Obtener las recetas segun el tipo.
 
