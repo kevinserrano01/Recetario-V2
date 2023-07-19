@@ -52,7 +52,7 @@ def getReceta(id):
     """ Obtener una receta que este en la bdd """
     conn = conectar()
     cur = conn.cursor()
-    cur.execute("SELECT * FROM RECETA WHERE id = %s", (id,))
+    cur.execute("SELECT * FROM receta WHERE id = %s", (id,))
     resultado = cur.fetchall()
     conn.close()
     return resultado

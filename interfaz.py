@@ -51,16 +51,15 @@ class Principal(ttk.Frame):
         self.tabla["displaycolumns"] = ('receta', 'tiempo_preparacion')
 
     def cargar_receta_aleatoria(self):
-        """Retorna una receta aleatoria de la base de datos"""
+        """Retorna una receta aleatoria de la base de datos mostrandolo en la tabla"""
         self.vaciar_tabla()
-        recetaRandom = DB.getIDRandom()
-        idReceta = recetaRandom["id"]
-        print(idReceta)
-        nombreReceta = recetaRandom["nombre"]
-        preparacionRecet = recetaRandom["tiempo_preparacion"]
-        self.tabla.insert('', tk.END, values=(idReceta, nombreReceta, preparacionRecet))
-        # ¡Aca escondemos la primera columna 'ID' con los ids de cada receta.
-        self.tabla["displaycolumns"] = ('receta', 'tiempo_preparacion')
+        idRecetaRandom = DB.getIDRandom()
+        receta_random = DB.getReceta(idRecetaRandom)
+        nombreReceta = receta_random[0][1]
+        preparacionRecet = receta_random[0][6]
+
+        self.tabla.insert('', tk.END, values=(idRecetaRandom, nombreReceta, preparacionRecet))
+        self.tabla["displaycolumns"] = ('receta', 'tiempo_preparacion') # ¡Aca escondemos la primera columna 'ID' con los ids de cada receta.
 
 
     def vaciar_tabla(self):
