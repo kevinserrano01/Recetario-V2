@@ -17,7 +17,7 @@ class Principal(ttk.Frame):
         # self.columnconfigure(3, weight=0)   # scrollbar
         self.rowconfigure(0, weight=1)  # titulo
         self.rowconfigure(1, weight=1)  # tipos
-        self.rowconfigure(2, weight=1)  # tareas
+        self.rowconfigure(2, weight=1)  # recetas
         self.rowconfigure(3, weight=1)  # acciones
         self.rowconfigure(4, weight=1)  # salir
 
@@ -50,6 +50,19 @@ class Principal(ttk.Frame):
         # ¡Aca escondemos la primera columna 'ID' con los ids de cada receta.
         self.tabla["displaycolumns"] = ('receta', 'tiempo_preparacion')
 
+    def cargar_receta_aleatoria(self):
+        """Retorna una receta aleatoria de la base de datos"""
+        self.vaciar_tabla()
+        recetaRandom = DB.getIDRandom()
+        idReceta = recetaRandom["id"]
+        print(idReceta)
+        nombreReceta = recetaRandom["nombre"]
+        preparacionRecet = recetaRandom["tiempo_preparacion"]
+        self.tabla.insert('', tk.END, values=(idReceta, nombreReceta, preparacionRecet))
+        # ¡Aca escondemos la primera columna 'ID' con los ids de cada receta.
+        self.tabla["displaycolumns"] = ('receta', 'tiempo_preparacion')
+
+
     def vaciar_tabla(self):
         for fila in self.tabla.get_children():
             self.tabla.delete(fila)
@@ -58,8 +71,8 @@ class Principal(ttk.Frame):
         """Crear la tabla con tres columnas, id, receta y completada.
         
         La columna ID se va a ocultar para que el usuario no la vea,
-        ya que no le interesa cual es el id de cada tarea.
-        De todas formas podemos obeneter el id de cada tarea despues.
+        ya que no le interesa cual es el id de cada receta.
+        De todas formas podemos obeneter el id de cada receta despues.
         """
         columnas = ('id', 'receta', 'tiempo_preparacion')
         self.tabla = ttk.Treeview(self, columns=columnas,show='headings', selectmode="browse") # sin multi-seleccion
@@ -72,21 +85,23 @@ class Principal(ttk.Frame):
         self.tabla.heading('tiempo_preparacion', text='tiempo_preparacion')
 
     def set_botonera1(self):
-        """crear la botonera para mostrar tareas en la tabla"""
+        """crear la botonera para mostrar las recetas en la tabla"""
         botonera1 = ttk.Frame(self)
         botonera1.grid(row=1, column=0, columnspan=4)
         botonera1.columnconfigure(0, weight=1)
         botonera1.columnconfigure(1, weight=1)
         botonera1.columnconfigure(2, weight=1)
-        btn_pendientes = ttk.Button(botonera1, text="Mostrar Favortas", command=lambda:self.cargar_recetas_fav(1))
+        btn_pendientes = ttk.Button(botonera1, text="Receta del dia", command=lambda:self.cargar_receta_aleatoria())
         btn_pendientes.grid(row=0, column=0, padx=3, pady=3)
+        btn_pendientes = ttk.Button(botonera1, text="Mostrar Favortas", command=lambda:self.cargar_recetas_fav(1))
+        btn_pendientes.grid(row=0, column=1, padx=3, pady=3)
         btn_completadas = ttk.Button(botonera1, text="Mostrar No favoritas", command=lambda:self.cargar_recetas_fav(0))
-        btn_completadas.grid(row=0, column=1, padx=3, pady=3)
+        btn_completadas.grid(row=0, column=2, padx=3, pady=3)
         btn_todo = ttk.Button(botonera1, text="Mostrar todo", command=lambda:self.cargar_tabla())
-        btn_todo.grid(row=0, column=2, padx=3, pady=3)
+        btn_todo.grid(row=0, column=3, padx=3, pady=3)
     
     def set_botonera2(self):
-        """crear botonera de abm de tareas"""
+        """crear botonera de abm de recetas"""
         botonera2 = ttk.Frame(self)
         botonera2.grid(row=3, column=0, columnspan=4)
         botonera2.columnconfigure(0, weight=1)
@@ -104,39 +119,22 @@ class Principal(ttk.Frame):
 
     def agregar(self):
         """Abrir ventana para crear nueva receta."""
-        ventana_tarea = tk.Toplevel(self.ventana)
-        Receta(ventana_tarea, self.cargar_tabla).grid(row=0, column=0, sticky=tk.NSEW)
+        ventana_receta = tk.Toplevel(self.ventana)
+        Receta(ventana_receta, self.cargar_tabla).grid(row=0, column=0, sticky=tk.NSEW)
 
     def modificar(self):
-        """Abrir ventana para modificar una tarea."""
-    #     seleccion = self.tabla.selection()
-    #     if seleccion:
-    #         item = self.tabla.item(seleccion[0])
-    #         id_tarea = item['values'][0] # id de la tarea obtenida del treeview
-    #         tarea = item['values'][1]
-    #         ventana_tarea = tk.Toplevel(self.ventana)
-    #         frame = Tarea(ventana_tarea, self.cargar_tabla,
-    #                       id_tarea=id_tarea, texto_tarea=tarea)
-    #         frame.grid(row=0, column=0, sticky=tk.NSEW)
-    #     else:
-    #         messagebox.showinfo(message="Debe seleccionar una tarea primero")
-        pass
+        """Abrir ventana para modificar una receta."""
+        seleccion = self.tabla.selection()
+        if seleccion:
+            item = self.tabla.item(seleccion[0])
+            id_receta = item['values'][0] # id de la receta obtenida del treeview
+            receta = item['values'][1]
+            ventana_receta = tk.Toplevel(self.ventana)
+            frame = Receta(ventana_receta, self.cargar_tabla, id_receta=id_receta, texto_receta=receta)
+            frame.grid(row=0, column=0, sticky=tk.NSEW)
+        else:
+            messagebox.showinfo(message="Debe seleccionar una receta primero")
 
-    def completar(self):
-    #     seleccion = self.tabla.selection()
-    #     if seleccion:
-    #         item = self.tabla.item(seleccion[0])
-    #         id_tarea = item['values'][0] # id de la tarea obtenida del treeview
-    #         completada = item['values'][2]
-    #         if completada == "Si":
-    #             messagebox.showinfo(message="La tarea ya estaba completada   ¬¬")
-    #             return
-    #         DB.completar_tarea(id_tarea)
-    #         messagebox.showinfo(message="Tarea completada :)")
-    #         self.cargar_tabla()
-    #     else:
-    #         messagebox.showinfo(message="Debe seleccionar una tarea primero")
-        pass
 
     def eliminar(self):
         seleccion = self.tabla.selection()
@@ -144,8 +142,8 @@ class Principal(ttk.Frame):
             item = self.tabla.item(seleccion[0])
             id_receta = item['values'][0] # id de la receta obtenida del treeview
             receta = item['values'][1]
-            mensaje = f"Esta a punto de eliminar la tarea: {receta}.\n¿Desea continuar?"
-            if askyesno(title="Eliminar tarea", message=mensaje):
+            mensaje = f"Esta a punto de eliminar la receta: {receta}.\n¿Desea continuar?"
+            if askyesno(title="Eliminar receta", message=mensaje):
                 DB.eliminar_receta(id_receta)
                 messagebox.showinfo(message="Receta eliminada.")
                 self.cargar_tabla()
@@ -155,23 +153,22 @@ class Principal(ttk.Frame):
 
 class Receta(ttk.Frame):
     """
-    Frame para la ventana que muestra una tarea para modificacion
+    Frame para la ventana que muestra una receta para modificacion
     o el formulario para crear una nueva.
     """
-    def __init__(self, parent, actualizar_tareas, id_tarea=None, texto_tarea=None):
+    def __init__(self, parent, actualizar_recetas, id_receta=None, texto_receta=None):
         super().__init__(parent, padding=10)
         parent.focus()
         parent.grab_set()
         self.cerrar_ventana = lambda:parent.destroy()
-        self.actualizar_tareas = actualizar_tareas
-        self.id_tarea = id_tarea
+        self.actualizar_recetas = actualizar_recetas
+        self.id_receta = id_receta
 
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
 
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
-
 
         # label
         ttk.Label(self, text="Nombre").grid(row=0, column=0)
@@ -180,7 +177,7 @@ class Receta(ttk.Frame):
         ttk.Label(self, text="tiempo preparacion (min)").grid(row=3, column=0)
         ttk.Label(self, text="coccion (min)").grid(row=4, column=0)
         ttk.Label(self, text="etiquetas").grid(row=5, column=0)
-        ttk.Label(self, text="favorito (Si: 1 | No: 0)").grid(row=6, column=0)
+        ttk.Label(self, text="favorito ( 1: Si - 0: No )").grid(row=6, column=0)
 
         # entry + var
         self.nombre = tk.StringVar()
@@ -231,14 +228,15 @@ class Receta(ttk.Frame):
         btn_guardar = ttk.Button(botonera, text="Agregar", command=self.guardar)
         btn_guardar.grid(row=0, column=1, padx=3, pady=3, sticky=tk.E)
 
-        # if id_tarea is not None:
-        #     # modificar la tarea
-        #     self.tarea_text.set(texto_tarea)
-        #     btn_guardar.configure(text="Modificar")
+        if id_receta is not None:
+            # modificar la receta
+            self.nombre.set(texto_receta)
+            btn_guardar.configure(text="Modificar")
         
         parent.bind('<Return>', lambda e: btn_guardar.invoke())
 
     def guardar(self):
+        """Funcion que guarda una receta nueva en la base de datos."""
         recetaNueva = {'nombre': self.nombre.get(),
                             'ingredientes': self.ingredientes.get(),
                             'preparacion': self.pasos.get(),
@@ -248,11 +246,11 @@ class Receta(ttk.Frame):
                             'fav': self.fav.get()
                             }
 
-        if self.id_tarea is not None:
-            DB.actualizar_tarea(self.id_tarea, recetaNueva)
+        if self.id_receta is not None:
+            DB.actualizar_receta(self.id_receta, recetaNueva)
         else:
             DB.nueva_receta(recetaNueva)
         # actualizar tabla
-        self.actualizar_tareas()
+        self.actualizar_recetas()
         # cerrar ventana
         self.cerrar_ventana()

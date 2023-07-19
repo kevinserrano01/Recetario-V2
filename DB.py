@@ -35,38 +35,12 @@ def getRecetasFav(fav):
     conn.close()
     return resultado
 
-def get_recetas(tipo="all"):
-    """Obtener las recetas segun el tipo.
 
-    Tipo es 'all' (todas), 'done' (completadas) o 'pending' (pendientes)
-    La cadena de la consulta se arma dependiendo del valor de tipo.
-    Si tipo es 'all', no se incluye la clausula WHERE.
-    Si tipo es 'done' se incluye el WHERE, con completadas = true
-    Si tipo es 'pending' se incluye el WHERE, con completadas = false
-    """
-    consulta = """SELECT id, receta, tiempo_preparacion
-                    FROM receta {}
-                    ORDER BY fecha_creacion DESC"""
-    where = "WHERE completada = {}"
-    if tipo == "done":
-        consulta = consulta.format(where.format("true"))
-    elif tipo == "pending":
-        consulta = consulta.format(where.format("false"))
-    elif tipo == "all":
-        consulta = consulta.format("")
-    conn = conectar()
-    cur = conn.cursor()
-    cur.execute(consulta)
-    resultado = cur.fetchall()
-    conn.close()
-    print(resultado)
-    return resultado
-    
 def getIDRandom():
     """Obtener todos los ids en orden descendente para conocer el ultimo"""
     conn = conectar()
     cur = conn.cursor()
-    cur.execute("SELECT id FROM RECETA ORDER BY id desc")
+    cur.execute("SELECT id, nombre, tiempo_preparacion FROM receta ORDER BY id desc")
     resultado = cur.fetchall()
     conn.close()
     listaDeIds = []
@@ -75,7 +49,7 @@ def getIDRandom():
     return random.choice(listaDeIds)
     
 def getReceta(id):
-    """ Obtener una receta que esten en la bdd """
+    """ Obtener una receta que este en la bdd """
     conn = conectar()
     cur = conn.cursor()
     cur.execute("SELECT * FROM RECETA WHERE id = %s", (id,))
@@ -99,6 +73,19 @@ def eliminar_receta(id_receta):
     conn = conectar()
     cur = conn.cursor()
     cur.execute(query, (id_receta,))
+    conn.commit()
+    conn.close()
+
+def actualizar_receta(id_receta, nuevaReceta):
+    """Actualiza la receta con el contenido pasado por parametro."""
+    tupla = (nuevaReceta["nombre"], nuevaReceta["ingredientes"], nuevaReceta["etiquetas"], nuevaReceta["preparacion"], nuevaReceta["tiempo_preparacion"], nuevaReceta["tiempo_coccion"], nuevaReceta["fav"])
+    query = """
+            UPDATE receta SET nombre = %s, ingredientes = %s, etiquetas = %s, preparacion = %s, tiempo_preparacion = %s, tiempo_coccion = %s, favorita = %s
+            WHERE id = %s;
+            """
+    conn = conectar()
+    cur = conn.cursor()
+    cur.execute(query, (tupla, id_receta))
     conn.commit()
     conn.close()
 
