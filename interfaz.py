@@ -83,6 +83,9 @@ class Principal(ttk.Frame):
         self.tabla.heading('receta', text='receta')
         self.tabla.heading('tiempo_preparacion', text='tiempo_preparacion')
 
+    def visualizar_receta(self):
+        pass
+
     def set_botonera1(self):
         """crear la botonera para mostrar las recetas en la tabla"""
         botonera1 = ttk.Frame(self)
@@ -90,12 +93,12 @@ class Principal(ttk.Frame):
         botonera1.columnconfigure(0, weight=1)
         botonera1.columnconfigure(1, weight=1)
         botonera1.columnconfigure(2, weight=1)
-        btn_pendientes = ttk.Button(botonera1, text="Receta del dia", command=lambda:self.cargar_receta_aleatoria())
-        btn_pendientes.grid(row=0, column=0, padx=3, pady=3)
-        btn_pendientes = ttk.Button(botonera1, text="Mostrar Favortas", command=lambda:self.cargar_recetas_fav(1))
-        btn_pendientes.grid(row=0, column=1, padx=3, pady=3)
-        btn_completadas = ttk.Button(botonera1, text="Mostrar No favoritas", command=lambda:self.cargar_recetas_fav(0))
-        btn_completadas.grid(row=0, column=2, padx=3, pady=3)
+        btn_aleatorio = ttk.Button(botonera1, text="Receta del dia", command=lambda:self.cargar_receta_aleatoria())
+        btn_aleatorio.grid(row=0, column=0, padx=3, pady=3)
+        btn_favoritas = ttk.Button(botonera1, text="Mostrar Favortas", command=lambda:self.cargar_recetas_fav(1))
+        btn_favoritas.grid(row=0, column=1, padx=3, pady=3)
+        btn_Nofavoritas = ttk.Button(botonera1, text="Mostrar No favoritas", command=lambda:self.cargar_recetas_fav(0))
+        btn_Nofavoritas.grid(row=0, column=2, padx=3, pady=3)
         btn_todo = ttk.Button(botonera1, text="Mostrar todo", command=lambda:self.cargar_tabla())
         btn_todo.grid(row=0, column=3, padx=3, pady=3)
     
@@ -106,6 +109,10 @@ class Principal(ttk.Frame):
         botonera2.columnconfigure(0, weight=1)
         botonera2.columnconfigure(1, weight=1)
         botonera2.columnconfigure(2, weight=1)
+        botonera2.columnconfigure(3, weight=1)
+
+        btn_visualizar = ttk.Button(botonera2, text="Ver", command=self.visualizar)
+        btn_visualizar.grid(row=0, column=0, padx=3, pady=3)
         
         btn_editar = ttk.Button(botonera2, text="Editar", command=self.modificar)
         btn_editar.grid(row=0, column=1, padx=3, pady=3)
@@ -120,6 +127,54 @@ class Principal(ttk.Frame):
         """Abrir ventana para crear nueva receta."""
         ventana_receta = tk.Toplevel(self.ventana)
         Receta(ventana_receta, self.cargar_tabla).grid(row=0, column=0, sticky=tk.NSEW)
+
+    def visualizar(self):
+        """Abrir ventana para visualizar una receta especifica."""
+        seleccion = self.tabla.selection()
+        if seleccion:
+            # print(seleccion) # Obtengo Codigo
+            datos_receta = self.tabla.item(seleccion[0]) # obtengo un diccionario
+            id_receta = datos_receta['values'][0] # id de la receta obtenida del treeview
+
+            receta_Visualizar = DB.getReceta(id_receta) # Obtengo todos los datos de una receta
+            # print(receta_Visualizar) Visualizar toda la informacion de la receta
+
+            # Recogemos lo datos de una receta
+            nombreReceta = receta_Visualizar[0][1] # id de la receta obtenida del treeview
+            ingredientesR = receta_Visualizar[0][2] 
+            etiquetasR = receta_Visualizar[0][3] 
+            preparacionR = receta_Visualizar[0][5] 
+            tiempoPreparaconR = receta_Visualizar[0][6]
+            tiempoCoccionR = receta_Visualizar[0][7] 
+            favoritaR = receta_Visualizar[0][8] 
+
+            ventana_nueva = tk.Tk()
+            # Configurar la ventana
+            ventana_nueva.title(nombreReceta)
+            ventana_nueva.geometry("500x200")  # Ancho x Alto
+            
+            # Agregar contenido a la ventana (etiquetas, botones, etc.)
+            etiqueta = tk.Label(ventana_nueva, text=f"Ingredientes: {ingredientesR}")
+            etiqueta.pack(pady=5)
+            etiqueta = tk.Label(ventana_nueva, text=f"Etiquetas: {etiquetasR}")
+            etiqueta.pack(pady=5)
+            etiqueta = tk.Label(ventana_nueva, text=f"Preparacion: {preparacionR}")
+            etiqueta.pack(pady=5)
+            etiqueta = tk.Label(ventana_nueva, text=f"Tiempo de preparacion (min): {tiempoPreparaconR}")
+            etiqueta.pack(pady=5)
+            etiqueta = tk.Label(ventana_nueva, text=f"Tiempo coccion (min): {tiempoCoccionR}")
+            etiqueta.pack(pady=5)
+            if favoritaR == 1:
+                etiqueta = tk.Label(ventana_nueva, text=f"favortia: Si")
+                etiqueta.pack(pady=5)
+            else:
+                etiqueta = tk.Label(ventana_nueva, text=f"favortia: No")
+                etiqueta.pack(pady=5)
+
+            # Ejecutar el bucle principal de Tkinter para mostrar la ventana
+            ventana_nueva.mainloop()
+        else:
+            messagebox.showinfo(message="Debe seleccionar una receta primero")
 
     def modificar(self):
         """Abrir ventana para modificar una receta."""
@@ -136,6 +191,7 @@ class Principal(ttk.Frame):
 
 
     def eliminar(self):
+        """Elimina una receta de la base de datos"""
         seleccion = self.tabla.selection()
         if seleccion:
             item = self.tabla.item(seleccion[0])
